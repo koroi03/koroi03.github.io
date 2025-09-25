@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouncing TUC Logo</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: sans-serif;
+        }
+
+        #logo-container {
+            position: absolute;
+            width: 300px; /* Width of the SVG logo */
+            height: 140px;  /* Height of the SVG logo */
+        }
+
+        /* Style for the SVG logo text */
+        .logo-text {
+            font-size: 120px;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="logo-container">
+        <svg width="300" height="140" viewBox="0 0 300 140">
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="logo-text" fill="#ffffff">TUC</text>
+        </svg>
+    </div>
+
+    <script>
+        const logoContainer = document.getElementById('logo-container');
+        const logo = logoContainer.querySelector('svg text');
+
+        // --- Configuration ---
+        const speed = 8; // Speed of the logo in pixels per frame
+        const colors = [
+            '#FF0000', // Red
+            '#00FF00', // Green
+            '#0000FF', // Blue
+            '#FFFF00', // Yellow
+            '#FF00FF', // Magenta
+            '#00FFFF', // Cyan
+            '#FFFFFF'  // White
+        ];
+
+        // --- State Variables ---
+        let posX = 50; // Initial X position
+        let posY = 50; // Initial Y position
+        
+        // Set initial random direction
+        let angle = Math.random() * 2 * Math.PI;
+        let velX = Math.cos(angle) * speed;
+        let velY = Math.sin(angle) * speed;
+
+        let screenWidth = window.innerWidth;
+        let screenHeight = window.innerHeight;
+
+        function getRandomColor() {
+            const currentColor = logo.getAttribute('fill');
+            let newColor;
+            do {
+                newColor = colors[Math.floor(Math.random() * colors.length)];
+            } while (newColor === currentColor); // Ensure the new color is different
+            return newColor;
+        }
+
+        function update() {
+            // Update position
+            posX += velX;
+            posY += velY;
+
+            let hasBounced = false;
+
+            // Collision detection with window edges
+            // Left edge
+            if (posX <= 0) {
+                posX = 0;
+                velX *= -1;
+                hasBounced = true;
+            }
+            // Right edge
+            if (posX + logoContainer.offsetWidth >= screenWidth) {
+                posX = screenWidth - logoContainer.offsetWidth;
+                velX *= -1;
+                hasBounced = true;
+            }
+            // Top edge
+            if (posY <= 0) {
+                posY = 0;
+                velY *= -1;
+                hasBounced = true;
+            }
+            // Bottom edge
+            if (posY + logoContainer.offsetHeight >= screenHeight) {
+                posY = screenHeight - logoContainer.offsetHeight;
+                velY *= -1;
+                hasBounced = true;
+            }
+
+            // Change color on bounce
+            if (hasBounced) {
+                logo.setAttribute('fill', getRandomColor());
+            }
+
+            // Apply the new position
+            logoContainer.style.left = `${posX}px`;
+            logoContainer.style.top = `${posY}px`;
+
+            // Request the next frame of the animation
+            requestAnimationFrame(update);
+        }
+        
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            screenWidth = window.innerWidth;
+            screenHeight = window.innerHeight;
+
+            // Prevent the logo from getting stuck outside the new window size
+            if (posX + logoContainer.offsetWidth > screenWidth) {
+                posX = screenWidth - logoContainer.offsetWidth;
+            }
+            if (posY + logoContainer.offsetHeight > screenHeight) {
+                posY = screenHeight - logoContainer.offsetHeight;
+            }
+        });
+
+        // Start the animation
+        requestAnimationFrame(update);
+    </script>
+
+</body>
+</html>
+
